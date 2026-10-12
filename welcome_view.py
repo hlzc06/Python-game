@@ -163,8 +163,22 @@ class WelcomeView(arcade.View):
 
         # 2. Textures for Characters
         self.tex_mira_idle = arcade.load_texture("images/Characters/extracted/mira_idle.png")
-        self.tex_mira_walk1 = arcade.load_texture("images/Characters/extracted/mira_walk_1.png")
-        self.tex_mira_walk2 = arcade.load_texture("images/Characters/extracted/mira_walk_2.png")
+        self.tex_mira_walk_front = [
+            arcade.load_texture("images/Characters/extracted/mira_walk_1.png"),
+            arcade.load_texture("images/Characters/extracted/mira_walk_2.png"),
+        ]
+        self.tex_mira_walk_right = [
+            arcade.load_texture(
+                f"images/Characters/directional/mira_walk_right_{frame}.png"
+            )
+            for frame in range(1, 5)
+        ]
+        self.tex_mira_walk_left = [
+            arcade.load_texture(
+                f"images/Characters/directional/mira_walk_left_{frame}.png"
+            )
+            for frame in range(1, 5)
+        ]
         self.tex_mira_bow = arcade.load_texture("images/Characters/extracted/mira_bow.png")
         self.tex_mira_celebrate = arcade.load_texture("images/Characters/extracted/mira_celebrate.png")
 
@@ -315,16 +329,24 @@ class WelcomeView(arcade.View):
             is_moving = (vx != 0 or vy != 0)
             if is_moving:
                 self.mira_anim_timer += delta_time
-                if self.mira_anim_timer >= 0.15:
+                if self.mira_anim_timer >= 0.12:
                     self.mira_anim_timer = 0
-                    self.mira_walk_frame = (self.mira_walk_frame + 1) % 2
-                    self.mira.texture = self.tex_mira_walk1 if self.mira_walk_frame == 0 else self.tex_mira_walk2
+                    if vx > 0:
+                        frames = self.tex_mira_walk_right
+                    elif vx < 0:
+                        frames = self.tex_mira_walk_left
+                    else:
+                        frames = self.tex_mira_walk_front
+                    self.mira_walk_frame = (
+                        self.mira_walk_frame + 1
+                    ) % len(frames)
+                    self.mira.texture = frames[self.mira_walk_frame]
             else:
                 self.mira.texture = self.tex_mira_idle
 
-            # Scale orientation
+            # Direction is already drawn into the new side-view textures.
             base_scale = 0.45
-            self.mira.scale = (base_scale if self.facing_right else -base_scale, base_scale)
+            self.mira.scale = (base_scale, base_scale)
 
             # Proximity check to Sol's table
             dist_to_sol = math.hypot(self.mira.center_x - self.sol.center_x, self.mira.center_y - self.sol.center_y)

@@ -210,9 +210,7 @@ class CookView(arcade.View):
         self.tex_knob   = arcade.load_texture("images/objects/interactive/stove_heat_knob.png")
         self.tex_recipe = arcade.load_texture("images/objects/trimmed/recipe_card.png")
         self.tex_food   = arcade.load_texture("images/objects/Food.png")
-        self.tex_steam  = arcade.load_texture("images/effects/trimmed/steam_puff.png")
         self.tex_spark  = arcade.load_texture("images/effects/oil_spark.png")
-        self.tex_smoke  = arcade.load_texture("images/effects/smoke_puff.png")
         self.tex_glow   = arcade.load_texture("images/effects/trimmed/golden_glow_particle.png")
         self.tex_confetti=arcade.load_texture("images/effects/trimmed/confetti_particle.png")
         self.tex_continue= arcade.load_texture("images/ui/trimmed/continue_button.png")
@@ -465,7 +463,9 @@ class CookView(arcade.View):
         # Steam
         steam_rate = 0.12 + self.heat * 0.01
         if random.random() < steam_rate:
-            self.steam_puffs.append(SteamPuff(px, py + PAN_H // 2 + 20, self.heat))
+            self.steam_puffs.append(
+                SteamPuff(px, py + 20, self.heat)
+            )
         # Sparks when hot
         if self.heat > 55 and random.random() < 0.08:
             self.oil_sparks.append(OilSpark(px, py))
@@ -510,13 +510,15 @@ class CookView(arcade.View):
         self.mira.center_y = 280
         arcade.draw_sprite(self.mira)
 
-        # Steam puffs
+        # Small grey squares rising from the pan
         for s in self.steam_puffs:
-            arcade.draw_texture_rect(
-                self.tex_steam,
-                arcade.XYWH(s.x + ox, s.y, s.size, s.size),
-                color=Color(255, 255, 255, s.alpha)
+            alpha = max(0, min(255, int(s.alpha)))
+
+            arcade.draw_rect_filled(
+                arcade.XYWH(s.x + ox, s.y, 12, 12),
+                Color(170, 170, 170, alpha)
             )
+
         # Oil sparks
         for o in self.oil_sparks:
             arcade.draw_texture_rect(
@@ -524,12 +526,14 @@ class CookView(arcade.View):
                 arcade.XYWH(o.x + ox, o.y, o.size, o.size),
                 color=Color(255, 220, 80, o.alpha)
             )
-        # Smoke
+        # Grey square smoke particles
         for sm in self.smoke_puffs:
-            arcade.draw_texture_rect(
-                self.tex_smoke,
-                arcade.XYWH(sm.x + ox, sm.y, sm.size, sm.size),
-                color=Color(120, 120, 120, sm.alpha)
+            size = 12  # Twice the size of a 6-pixel washing dot
+            alpha = max(0, min(255, int(sm.alpha)))
+
+            arcade.draw_rect_filled(
+                arcade.XYWH(sm.x + ox, sm.y, size, size),
+                Color(150, 150, 150, alpha)
             )
 
         # Confetti

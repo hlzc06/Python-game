@@ -22,7 +22,8 @@ class AudioManager:
                 self.sounds[name] = arcade.load_sound(str(path))
             self.players = [(sound, player) for sound, player in self.players if player.playing]
             sound = self.sounds[name]
-            player = sound.play(volume=.35)
+            volume = 0.15 if name == "wash" else 0.35
+            player = sound.play(volume=volume)
             if player is not None:
                 self.players.append((sound, player))
         except Exception as exc:

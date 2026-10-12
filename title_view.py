@@ -29,13 +29,22 @@ class TitleView(arcade.View):
         self.mira_idle = arcade.load_texture(
             ROOT / "images/Characters/extracted/mira_idle.png"
         )
-        self.mira_walk = [
+        # Front-facing frames are kept for the final upward movement.
+        self.mira_walk_front = [
             arcade.load_texture(
                 ROOT / "images/Characters/extracted/mira_walk_1.png"
             ),
             arcade.load_texture(
                 ROOT / "images/Characters/extracted/mira_walk_2.png"
             ),
+        ]
+        # Dedicated profile frames stop Mira looking as though she is
+        # sliding sideways during the horizontal part of the title path.
+        self.mira_walk_right = [
+            arcade.load_texture(
+                ROOT / f"images/Characters/directional/mira_walk_right_{frame}.png"
+            )
+            for frame in range(1, 5)
         ]
 
         self.rain_texture = arcade.load_texture(
@@ -145,8 +154,12 @@ class TitleView(arcade.View):
             feet_y = path_y + (door_y - path_y) * vertical
 
         if self.starting:
-            frame = int(self.elapsed * 8) % 2
-            texture = self.mira_walk[frame]
+            if progress <= 0.8:
+                frame = int(self.elapsed * 8) % len(self.mira_walk_right)
+                texture = self.mira_walk_right[frame]
+            else:
+                frame = int(self.elapsed * 8) % len(self.mira_walk_front)
+                texture = self.mira_walk_front[frame]
             breathing = 1.0
         else:
             texture = self.mira_idle

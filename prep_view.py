@@ -231,7 +231,6 @@ class PrepView(arcade.View):
         self.tex_board   = arcade.load_texture("images/objects/interactive/cutting_board.png")
         self.tex_knife   = arcade.load_texture("images/objects/interactive/knife.png")
         self.tex_recipe  = arcade.load_texture("images/objects/trimmed/recipe_card.png")
-        self.tex_water   = arcade.load_texture("images/effects/trimmed/water_droplet.png")
         self.tex_veg     = arcade.load_texture("images/effects/vegetable_fragment.png")
         self.tex_glow    = arcade.load_texture("images/effects/trimmed/golden_glow_particle.png")
         self.tex_confetti= arcade.load_texture("images/effects/trimmed/confetti_particle.png")
@@ -402,10 +401,13 @@ class PrepView(arcade.View):
 
             # Small splashes around the ingredient.
             if random.random() < min(1.0, dt * 18):
-                drop = WaterDroplet(sx + 10, sy - 20)
-                drop.vx = random.uniform(-25, 25)
-                drop.vy = random.uniform(15, 40)
-                drop.size = random.uniform(10, 20)
+                drop = WaterDroplet(
+                    sx + random.uniform(-40, 40),
+                    sy - 20 + random.uniform(-12, 12)
+                )
+                drop.vx = random.uniform(-12, 12)
+                drop.vy = random.uniform(5, 15)
+                drop.size = random.choice([4, 6, 8])
                 drop.life = 0.25
                 self.water_droplets.append(drop)
 
@@ -501,12 +503,15 @@ class PrepView(arcade.View):
             arcade.draw_texture_rect(c_tex, arcade.XYWH(cx, cy, 48, 48))
             arcade.draw_text("✓ Diced", cx, cy - 30, (255, 235, 100), 8, bold=True, anchor_x="center")
 
-        # Water droplet particles
+        # Pixelated blue dots inside the sink
+        sx, sy = SINK_CENTER
+
         for d in self.water_droplets:
-            arcade.draw_texture_rect(
-                self.tex_water,
-                arcade.XYWH(d.x + ox, d.y, d.size, d.size),
-                color=Color(255,255,255,255))
+            if abs(d.x - sx) <= 55 and abs(d.y - (sy - 20)) <= 25:
+                arcade.draw_rect_filled(
+                    arcade.XYWH(d.x + ox, d.y, d.size, d.size),
+                    (40, 190, 255, 255)
+                )
         # Vegetable fragments
         for v in self.veg_fragments:
             arcade.draw_texture_rect(
